@@ -12,6 +12,8 @@ export class RoleService{
     ){}
 
     async seed(){
+        if((await this.roleRepository.find()).length > 0)
+            return 
         //order in array elements is roleName, create, update, fetch, delete
         const rolePermissions = [[ROLES.ADMIN,true, true, true, true],[ROLES.CUSTOMER, false,false, true, false],[ROLES.SUPPORTER,false, false, true, true ],[ROLES.SELLER,true, true, true, false]]
         for(const role of rolePermissions){
