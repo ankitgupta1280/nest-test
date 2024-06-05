@@ -18,7 +18,7 @@ export class UserService{
     private readonly saltRounds = 10
 
     async createUser(signupDto: SignupDto){
-        const existingUser  = await this.userRepository.findBy({
+        const existingUser  = await this.userRepository.findOneBy({
             username: signupDto.username
         })
         if(!existingUser){
@@ -27,7 +27,8 @@ export class UserService{
             user.password = hashedPassword
             user.username = signupDto.username
             user.role = signupDto.role
-            return await this.userRepository.save(user)
+            const newUser=  await this.userRepository.save(user)
+            return newUser
         }
         return null
     }
@@ -37,8 +38,8 @@ export class UserService{
             username: loginDto.username
         })
         if(existingUser){
-            if(this.comparePassword(loginDto.password, existingUser.password)){
-                const token  = this.jwtService.generateToken({
+            if(await this.comparePassword(loginDto.password, existingUser.password)){
+                const token  = await this.jwtService.generateToken({
                     id: existingUser.id,
                     role: existingUser.role,
                     username: existingUser.username
@@ -54,7 +55,7 @@ export class UserService{
     }
 
     async comparePassword(password: string, hashedPassword){
-        return bcrypt.compare(password,hashedPassword)
+        return await bcrypt.compare(password,hashedPassword)
     }
 
     async getUserById(id: string){
